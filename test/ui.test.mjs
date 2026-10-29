@@ -241,7 +241,7 @@ test('panel insertion targets the previous Markdown editor and returns typing fo
   document.body.append(palette.contentEl);
   const token = palette.contentEl.querySelector('.spn-token');
   activate(palette); token.focus(); token.click();
-  assert.equal(input.value, 'abINSERT\nef'); assert.equal(edits, 1);
+  assert.equal(input.value, 'abINSERTef'); assert.equal(edits, 1);
   assert.equal(document.activeElement, input);
   palette.dispose(); extension.onunload(); extension.dispose();
 });

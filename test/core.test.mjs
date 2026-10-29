@@ -33,15 +33,15 @@ test('reordering uses gap positions without mutating the input', () => {
 });
 
 const cases = [
-  ['selection', 'abc', [1, 2], 'atext\nc'],
-  ['selection', '', [0, 0], 'text\n'],
+  ['selection', 'abc', [1, 2], 'atextc'],
+  ['selection', '', [0, 0], 'text'],
   ['beginning', 'note', [0, 0], 'text\nnote'],
   ['beginning', '---\ntitle: A\n---\nbody', [0, 0], '---\ntitle: A\n---\ntext\nbody'],
-  ['beginning', '---\ntitle: A\n---', [0, 0], '---\ntitle: A\n---\ntext\n'],
+  ['beginning', '---\ntitle: A\n---', [0, 0], '---\ntitle: A\n---\ntext'],
   ['beginning', '\uFEFF---\ntitle: A\n...\nbody', [0, 0], '\uFEFF---\ntitle: A\n...\ntext\nbody'],
   ['beginning', '---\nunclosed', [0, 0], 'text\n---\nunclosed'],
-  ['ending', 'note', [0, 0], 'note\ntext\n'],
-  ['ending', 'note\n', [0, 0], 'note\ntext\n'],
+  ['ending', 'note', [0, 0], 'note\ntext'],
+  ['ending', 'note\n', [0, 0], 'note\ntext'],
   ['beginning', '---\r\nx: y\r\n---\r\nbody', [0, 0], '---\r\nx: y\r\n---\r\ntext\r\nbody']
 ];
 for (const [placement, note, selection, expected] of cases) {
@@ -103,4 +103,21 @@ test('legacy icon options are ignored while snippet data and layout are preserve
   legacy.entries[0].glyph = 'star';
   legacy.preferences.icons = true; legacy.preferences.shortcuts = true;
   assert.deepEqual(decodeDocument(legacy), document);
+});
+
+
+test('cursor insertion preserves intentional trailing newlines without adding any', () => {
+  for (const body of ['inline', 'line\n', 'paragraph\n\n']) {
+    const edit = planInsertion('before\nafter', clip('x', { body }), [6, 6]);
+    assert.equal(edit.text, body);
+  }
+  const edit = planInsertion('a\r\nb', clip('x', { body: 'one\ntwo\n' }), [0, 0]);
+  assert.equal(edit.text, 'one\r\ntwo\r\n');
+});
+
+test('boundary insertion adds only needed separators', () => {
+  assert.equal(planInsertion('', clip('x', { placement: 'beginning' }), [0, 0]).text, 'text');
+  assert.equal(planInsertion('', clip('x', { placement: 'ending' }), [0, 0]).text, 'text');
+  assert.equal(planInsertion('\nbody', clip('x', { placement: 'beginning' }), [0, 0]).text, 'text');
+  assert.equal(planInsertion('body', clip('x', { body: '\ntext', placement: 'ending' }), [0, 0]).text, '\ntext');
 });

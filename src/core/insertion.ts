@@ -10,7 +10,6 @@ export function planInsertion(note: string, clip: Clip, selection: readonly [num
   if (clip.unique && first.length > 0 && note.includes(first)) return { status: 'duplicate' };
   const newline = note.includes('\r\n') ? '\r\n' : '\n';
   let text = clip.body.replace(/\r?\n/g, newline);
-  if (!text.endsWith(newline)) text += newline;
   let start: number;
   let end: number;
   if (clip.placement === 'selection') {
@@ -18,7 +17,7 @@ export function planInsertion(note: string, clip: Clip, selection: readonly [num
     if (start < 0 || end < start || end > note.length) throw new Error('Selection is outside the note');
   } else if (clip.placement === 'ending') {
     start = end = note.length;
-    if (note.length && !note.endsWith('\n')) text = newline + text;
+    if (note.length && !note.endsWith('\n') && !text.startsWith(newline)) text = newline + text;
   } else {
     start = end = 0;
     // Match a complete YAML block at the very beginning, accepting an optional BOM.
@@ -31,6 +30,8 @@ export function planInsertion(note: string, clip: Clip, selection: readonly [num
         if (start === note.length && !note.endsWith('\n')) text = newline + text;
       }
     }
+    // Separate a prepended block from existing text without adding a trailing blank line.
+    if (start < note.length && !text.endsWith(newline) && !note.slice(start).startsWith(newline)) text += newline;
   }
   return { status: 'ready', start, end, text };
 }
