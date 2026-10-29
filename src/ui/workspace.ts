@@ -50,14 +50,17 @@ export class PaletteWorkspace extends ItemView {
     });
     this.area = this.contentEl.createDiv({ cls: 'spn-palette' });
     this.register(this.context.catalog.subscribe(() => this.paint()));
-    this.registerEvent(this.app.workspace.on('active-leaf-change', () => this.paint()));
+    this.registerEvent(this.app.workspace.on('active-leaf-change', () => this.updateDestination()));
     this.paint();
+  }
+  private updateDestination(): void {
+    const name = this.context.targetName();
+    this.destination?.setText(name ? text('destination', { title: name }) : text('noDestination'));
   }
   private paint(): void {
     const area = this.area;
-    if (!area || !this.destination) return;
-    const name = this.context.targetName();
-    this.destination.setText(name ? text('destination', { title: name }) : text('noDestination'));
+    if (!area) return;
+    this.updateDestination();
     const document = this.context.catalog.snapshot();
     area.dataset.flow = document.preferences.flow;
     area.empty();
@@ -69,8 +72,22 @@ export class PaletteWorkspace extends ItemView {
         attr: { type: 'button', 'aria-label': text('insertLabel', { title: entry.title }), title: entry.body }
       });
       button.createSpan({ text: entry.title });
-      button.addEventListener('mousedown', event => { if (event.button === 0) event.preventDefault(); });
-      button.addEventListener('click', () => this.context.insert(entry.key));
+      // Keep the editor selection and prevent the workspace from activating this pane.
+      button.addEventListener('pointerdown', event => {
+        if (event.button !== 0) return;
+        event.stopPropagation();
+        // Preserve touch scrolling; insertion still happens on click, never on press.
+        if (event.pointerType !== 'touch') event.preventDefault();
+      });
+      button.addEventListener('mousedown', event => {
+        if (event.button !== 0) return;
+        event.preventDefault();
+        event.stopPropagation();
+      });
+      button.addEventListener('click', event => {
+        event.stopPropagation();
+        this.context.insert(entry.key);
+      });
     }
     if (!matches.length) area.createEl('p', { cls: 'spn-muted', text: text(filter ? 'noResults' : 'emptyList') });
   }

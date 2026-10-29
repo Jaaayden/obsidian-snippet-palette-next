@@ -30,7 +30,10 @@ export default class PaletteNext extends Plugin {
         const view = target.resolve();
         if (!view?.file || view.getMode() !== 'source') { new Notice(text('needEditor')); return; }
         const clip = this.catalog.snapshot().entries.find(entry => entry.key === key);
-        if (clip) this.apply(view.editor, clip);
+        if (clip) {
+          this.apply(view.editor, clip);
+          view.editor.focus();
+        }
       },
       reportSaveFailure: () => { new Notice(text('writeError')); }
     };

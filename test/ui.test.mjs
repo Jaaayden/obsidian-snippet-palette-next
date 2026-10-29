@@ -172,3 +172,76 @@ test('plugin lifecycle registers and removes dynamic actions without writing def
   assert.equal(extension.saved.preferences.icons, true); // Loading never rewrites the existing file.
   extension.onunload(); extension.dispose(); assert.equal(extension.commands.has('paste-x'), false);
 });
+
+
+test('a leaf change between press and release keeps the first click and editor selection', async () => {
+  const { app, context, activate } = fixture(); await populate(context);
+  const editor = document.createElement('textarea'); editor.value = 'abcdef';
+  document.body.append(editor); editor.focus(); editor.setSelectionRange(2, 4);
+  const view = new api.PaletteWorkspace({ app }, context); await view.onOpen();
+  document.body.append(view.contentEl);
+  let inserted = 0; context.insert = () => { inserted++; };
+  let activated = 0;
+  for (const type of ['pointerdown', 'mousedown', 'click']) {
+    view.contentEl.addEventListener(type, () => { activated++; activate(view); });
+  }
+  const token = view.contentEl.querySelector('.spn-token');
+  const pointer = new dom.window.MouseEvent('pointerdown', { bubbles: true, cancelable: true, button: 0 });
+  Object.defineProperty(pointer, 'pointerType', { value: 'mouse' });
+  token.dispatchEvent(pointer);
+  const mouse = new dom.window.MouseEvent('mousedown', { bubbles: true, cancelable: true, button: 0 });
+  token.dispatchEvent(mouse);
+  // Even a host capture listener activating a leaf must not remove the pressed button.
+  activate(view);
+  assert.equal(view.contentEl.querySelector('.spn-token'), token);
+  token.dispatchEvent(new dom.window.MouseEvent('mouseup', { bubbles: true }));
+  token.click();
+  assert.equal(inserted, 1); assert.equal(activated, 0);
+  assert.equal(pointer.defaultPrevented, true); assert.equal(mouse.defaultPrevented, true);
+  assert.equal(document.activeElement, editor);
+  assert.equal(editor.selectionStart, 2); assert.equal(editor.selectionEnd, 4);
+  view.dispose();
+});
+
+test('touch scrolling does not insert on press and keyboard activation remains available', async () => {
+  const { app, context } = fixture(); await populate(context);
+  const view = new api.PaletteWorkspace({ app }, context); await view.onOpen();
+  const token = view.contentEl.querySelector('.spn-token'); let calls = 0;
+  context.insert = () => { calls++; };
+  const pointer = new dom.window.MouseEvent('pointerdown', { bubbles: true, cancelable: true, button: 0 });
+  Object.defineProperty(pointer, 'pointerType', { value: 'touch' });
+  token.dispatchEvent(pointer);
+  assert.equal(pointer.defaultPrevented, false); assert.equal(calls, 0);
+  token.dispatchEvent(new dom.window.Event('pointercancel', { bubbles: true }));
+  assert.equal(calls, 0);
+  token.dispatchEvent(new dom.window.MouseEvent('click', { bubbles: true, detail: 0 }));
+  assert.equal(calls, 1);
+  view.dispose();
+});
+
+test('panel insertion targets the previous Markdown editor and returns typing focus', async () => {
+  const { app, activate, leaves } = fixture();
+  const input = document.createElement('textarea'); input.value = 'abcdef';
+  document.body.append(input); input.focus(); input.setSelectionRange(2, 4);
+  let edits = 0;
+  const markdown = new api.MarkdownView(); markdown.file = { basename: 'Note' };
+  markdown.getMode = () => 'source';
+  markdown.editor = {
+    getValue: () => input.value,
+    getCursor: side => side === 'from' ? input.selectionStart : input.selectionEnd,
+    posToOffset: offset => offset, offsetToPos: offset => offset,
+    replaceRange: (text, from, to) => { edits++; input.setRangeText(text, from, to, 'end'); },
+    focus: () => input.focus()
+  };
+  leaves.push({ view: markdown }); activate(markdown);
+  const extension = new api.Extension(app); extension.saved = api.blankDocument();
+  extension.saved.entries.push({ ...api.newClip('x'), title: 'X', body: 'INSERT' });
+  await extension.onload();
+  const palette = extension.constructors.get('spn-workspace')({ app }); await palette.onOpen();
+  document.body.append(palette.contentEl);
+  const token = palette.contentEl.querySelector('.spn-token');
+  activate(palette); token.focus(); token.click();
+  assert.equal(input.value, 'abINSERT\nef'); assert.equal(edits, 1);
+  assert.equal(document.activeElement, input);
+  palette.dispose(); extension.onunload(); extension.dispose();
+});
