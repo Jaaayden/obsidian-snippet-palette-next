@@ -1,0 +1,64 @@
+/* Snippet Palette Next: all rules are scoped to the plugin's own UI. */
+.spn-workspace { padding: 10px; }
+.spn-bar, .spn-library-bar, .spn-row-tools { display: flex; align-items: center; gap: 4px; }
+.spn-bar { margin-bottom: 8px; }
+.spn-destination { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--font-ui-smaller); color: var(--text-muted); }
+.spn-workspace .spn-filter { width: 100%; margin: 0 0 10px; }
+.spn-workspace .spn-filter[hidden] { display: none; }
+.spn-palette { display: flex; align-items: flex-start; gap: 7px; }
+.spn-palette[data-flow="tiles"] { flex-wrap: wrap; }
+.spn-palette[data-flow="stack"] { flex-direction: column; align-items: stretch; }
+.spn-palette[data-flow="strip"] { overflow-x: auto; flex-wrap: nowrap; padding-bottom: 7px; }
+.spn-palette[data-flow="strip"] .spn-token { flex: none; max-width: none; white-space: nowrap; }
+.spn-gray { --spn-color: var(--mono-rgb-100); }
+.spn-azure { --spn-color: var(--color-blue-rgb); }
+.spn-mint { --spn-color: var(--color-green-rgb); }
+.spn-amber { --spn-color: var(--color-orange-rgb); }
+.spn-rose { --spn-color: var(--color-pink-rgb); }
+.spn-violet { --spn-color: var(--color-purple-rgb); }
+.spn-palette button.spn-token {
+  display: inline-flex; align-items: center; justify-content: flex-start; gap: 6px;
+  padding: 5px 9px; height: auto; min-height: 31px; max-width: 100%;
+  border: 1px solid rgba(var(--spn-color), 0.32); border-radius: 6px;
+  color: var(--text-normal); background: rgba(var(--spn-color), 0.1); box-shadow: none;
+  font-size: var(--font-ui-small); line-height: 1.45; text-align: left; white-space: normal; overflow-wrap: anywhere;
+}
+.spn-palette button.spn-token:hover { background: rgba(var(--spn-color), 0.2); }
+.spn-token > span:last-child { min-width: 0; }
+.spn-glyph { display: inline-flex; flex: none; align-items: center; }
+.spn-glyph svg, .spn-tool svg { height: 16px; width: 16px; }
+.spn-glyph-result { display: flex; align-items: center; gap: 10px; }
+.spn-workspace button.spn-tool, .spn-preferences button.spn-tool {
+  display: inline-flex; flex: none; align-items: center; justify-content: center;
+  width: 27px; height: 27px; min-height: 0; margin: 0; padding: 4px;
+  border: none; border-radius: 4px; box-shadow: none; background: transparent; color: var(--text-muted);
+}
+.spn-tool > span { display: flex; }
+.spn-workspace button.spn-tool:hover, .spn-preferences button.spn-tool:hover { background: var(--background-modifier-hover); color: var(--text-normal); }
+.spn-preferences button.spn-tool:disabled { opacity: 0.3; }
+.spn-version { font-size: var(--font-ui-small); color: var(--text-muted); margin-bottom: 14px; }
+.spn-preferences > .setting-item { margin: 0; padding: 10px 0; border-radius: 0; background: transparent; box-shadow: none; }
+.spn-library-bar { margin: 18px 0 8px; gap: 9px; }
+.spn-library-bar > span { flex: none; font-size: var(--font-ui-small); font-weight: 600; }
+.spn-library-bar input { width: 100%; flex: 1; min-width: 0; height: 30px; }
+.spn-catalog { border-top: 1px solid var(--background-modifier-border); }
+.spn-record { position: relative; display: flex; align-items: center; gap: 4px; min-height: 37px; padding: 3px 0; border-bottom: 1px solid var(--background-modifier-border); }
+.spn-preferences button.spn-record-name {
+  flex: 1; min-width: 0; display: block; position: relative; height: 29px;
+  padding: 0 7px 0 18px; border: 0; border-radius: 4px; background: transparent;
+  color: var(--text-normal); box-shadow: none; font-weight: 500; font-size: var(--font-ui-small);
+  text-align: left; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;
+}
+.spn-record-name::before { content: ''; width: 7px; height: 7px; position: absolute; left: 4px; top: calc(50% - 3.5px); border-radius: 50%; background: rgb(var(--spn-color)); }
+.spn-preferences button.spn-record-name:hover { background: var(--background-modifier-hover); }
+.spn-preferences button.spn-grip { cursor: grab; touch-action: none; width: 23px; }
+.spn-preferences button.spn-grip:active { cursor: grabbing; }
+.spn-moving { opacity: 0.5; }
+.spn-before::before, .spn-after::after { content: ''; position: absolute; left: 0; right: 0; height: 2px; background: var(--interactive-accent); pointer-events: none; }
+.spn-before::before { top: -1px; }
+.spn-after::after { bottom: -1px; }
+.spn-body-field { flex-direction: column; align-items: stretch; gap: 8px; }
+.spn-body-field textarea { width: 100%; min-height: 150px; resize: vertical; font-family: var(--font-monospace); }
+.spn-muted { margin: 10px 0; color: var(--text-muted); font-size: var(--font-ui-small); }
+.spn-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.spn-workspace button:focus-visible, .spn-preferences button:focus-visible { outline: 2px solid var(--interactive-accent); outline-offset: 1px; }

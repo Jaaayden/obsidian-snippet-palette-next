@@ -1,0 +1,10 @@
+{
+  "id": "snippet-palette-next",
+  "name": "Snippet Palette Next",
+  "version": "1.0.0",
+  "minAppVersion": "1.8.7",
+  "description": "Insert reusable text from a compact, colorful palette with searchable icons and drag sorting.",
+  "author": "Jayden",
+  "authorUrl": "https://github.com/Jaaayden",
+  "isDesktopOnly": false
+}
