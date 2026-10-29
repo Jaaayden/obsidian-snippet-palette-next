@@ -61,9 +61,9 @@ test('queued commits are lossless and observers see only persisted state', async
   const saved = [];
   const catalog = new Catalog(async next => { await Promise.resolve(); saved.push(structuredClone(next)); });
   const seen = []; const stop = catalog.subscribe(() => seen.push(catalog.snapshot().entries.length));
-  await Promise.all([catalog.put(clip('a'), false), catalog.put(clip('b'), false), catalog.configure({ icons: true })]);
+  await Promise.all([catalog.put(clip('a'), false), catalog.put(clip('b'), false), catalog.configure({ flow: 'strip' })]);
   assert.deepEqual(catalog.snapshot().entries.map(x => x.key), ['a', 'b']);
-  assert.equal(catalog.snapshot().preferences.icons, true);
+  assert.equal(catalog.snapshot().preferences.flow, 'strip');
   assert.deepEqual(seen, [1, 2, 2]);
   assert.equal(saved[0].entries.length, 1);
   stop(); await catalog.remove('a'); assert.equal(seen.length, 3);
@@ -95,4 +95,12 @@ test('moves use stable anchors across filtered lists', async () => {
   assert.deepEqual(catalog.snapshot().entries.map(x => x.key), ['visible-b', 'visible-a', 'hidden']);
   await catalog.move('visible-b', 'hidden', 'after');
   assert.deepEqual(catalog.snapshot().entries.map(x => x.key), ['visible-a', 'hidden', 'visible-b']);
+});
+
+test('legacy icon options are ignored while snippet data and layout are preserved', () => {
+  const document = blankDocument(); document.entries.push(clip('legacy'));
+  const legacy = structuredClone(document);
+  legacy.entries[0].glyph = 'star';
+  legacy.preferences.icons = true; legacy.preferences.shortcuts = true;
+  assert.deepEqual(decodeDocument(legacy), document);
 });

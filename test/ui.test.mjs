@@ -81,13 +81,13 @@ test('workspace toggles search, clears hidden filtering and preserves mouse sele
   view.dispose();
 });
 
-test('workspace reacts to layouts and icons and releases its subscription', async () => {
+test('workspace keeps text-only labels across layouts and releases its subscription', async () => {
   const { context, app } = fixture(); await populate(context);
   const view = new api.PaletteWorkspace({ app }, context); await view.onOpen();
   assert.equal(view.contentEl.querySelectorAll('.spn-token svg').length, 0);
-  await context.catalog.configure({ flow: 'strip', icons: true });
+  await context.catalog.configure({ flow: 'strip' });
   assert.equal(view.contentEl.querySelector('.spn-palette').dataset.flow, 'strip');
-  assert.equal(view.contentEl.querySelectorAll('.spn-token svg').length, 3);
+  assert.equal(view.contentEl.querySelectorAll('.spn-token svg').length, 0);
   view.dispose(); await view.onClose(); await context.catalog.remove('one');
   assert.equal(view.contentEl.querySelectorAll('.spn-token').length, 3);
 });
@@ -100,6 +100,8 @@ test('compact preferences show version and open an isolated editor', async () =>
   assert.equal(tab.containerEl.querySelectorAll('textarea').length, 0);
   tab.containerEl.querySelector('.spn-record-name').click();
   const dialog = api.Modal.opened.at(-1);
+  assert.equal(dialog.contentEl.textContent.includes('Icon'), false);
+  assert.equal(tab.containerEl.querySelectorAll('input[type=checkbox]').length, 0);
   input(dialog.contentEl.querySelector('input'), 'changed'); button(dialog.contentEl, 'Cancel').click();
   assert.equal(context.catalog.snapshot().entries[0].title, 'one'); tab.hide();
 });
@@ -156,10 +158,7 @@ test('editor target remembers the pane, but never resurrects a closed pane', () 
   target.clear(); assert.equal(target.resolve(), null);
 });
 
-test('icon search is bounded and unsupported languages fall back to English', () => {
-  const { context } = fixture(); const chooser = new api.GlyphChooser(context, () => {});
-  assert.deepEqual(chooser.getSuggestions('STAR'), ['star']);
-  assert.equal(chooser.getSuggestions('nonexistent').length, 0);
+test('unsupported languages fall back to English', () => {
   assert.equal(api.translate('zh-CN', 'save'), '保存'); assert.equal(api.translate('de', 'save'), 'Save');
   assert.equal(api.translate('en', 'version', { version: '7.0.1' }), 'Installed version 7.0.1');
 });
@@ -167,8 +166,9 @@ test('icon search is bounded and unsupported languages fall back to English', ()
 test('plugin lifecycle registers and removes dynamic actions without writing default data', async () => {
   const { app } = fixture(); const extension = new api.Extension(app);
   const data = api.blankDocument(); data.entries.push({ ...api.newClip('x'), title: 'X', body: 'text' });
-  extension.saved = structuredClone(data); await extension.onload();
+  extension.saved = { ...structuredClone(data), preferences: { flow: 'tiles', icons: true, shortcuts: true } }; await extension.onload();
+  assert.equal(extension.ribbons.length, 1);
   assert.ok(extension.commands.has('paste-x'));
-  assert.deepEqual(extension.saved, data);
+  assert.equal(extension.saved.preferences.icons, true); // Loading never rewrites the existing file.
   extension.onunload(); extension.dispose(); assert.equal(extension.commands.has('paste-x'), false);
 });

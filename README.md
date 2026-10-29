@@ -2,10 +2,9 @@
 
 A compact, dockable text-snippet palette for Obsidian 1.8.7 and later.
 
-- Visible titles with stable accent colors; optional icons.
+- Text-only titles with stable accent colors.
 - Wrapped tiles, a vertical list, or a horizontal strip.
 - Search stays hidden until you press the search button; Escape closes it.
-- Searchable icon chooser using icons actually available in your Obsidian version.
 - Compact settings list with a separate Save/Cancel editor.
 - Drag handles support pointer and touch input, edge scrolling, and cancellation. Keyboard users can move a focused handle with arrow keys, Home, and End.
 - Insert at the selection, below YAML frontmatter, or at the end of a note; optional duplicate checking.
@@ -21,7 +20,7 @@ This project has **not been accepted into the Obsidian community directory**. Se
 
 将 Release 中的 `main.js`、`manifest.json`、`styles.css` 放入笔记库的 `.obsidian/plugins/snippet-palette-next/`，重载 Obsidian 后启用插件。点击侧栏图标打开片段面板，可拖动面板到侧边栏或主工作区。
 
-设置页面使用紧凑列表；点击标题或编辑按钮进入详情，保存才会写入。拖动左侧手柄调整顺序，也可聚焦手柄后使用方向键、Home、End。标题始终显示，图标可关闭。面板搜索默认隐藏，点击搜索按钮展开，按 Esc 关闭。请先打开可编辑的 Markdown 笔记，再点击片段插入。
+设置页面使用紧凑列表；点击标题或编辑按钮进入详情，保存才会写入。拖动左侧手柄调整顺序，也可聚焦手柄后使用方向键、Home、End。片段统一显示标题和底色，不使用图标。面板搜索默认隐藏，点击搜索按钮展开，按 Esc 关闭。请先打开可编辑的 Markdown 笔记，再点击片段插入。
 
 旧插件数据不会在插件启动时自动读取。替换旧版时，应先备份旧插件及 Obsidian 配置，再显式转换数据；不要直接将旧版 `data.json` 覆盖到新目录。
 

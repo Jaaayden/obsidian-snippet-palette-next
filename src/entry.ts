@@ -12,7 +12,6 @@ export default class PaletteNext extends Plugin {
   private target: EditorTarget | null = null;
   private catalog = new Catalog(value => this.saveData(value));
   private ownedCommandIds: string[] = [];
-  private shortcuts: HTMLElement[] = [];
   async onload(): Promise<void> {
     try { this.catalog.initialize(await this.loadData()); }
     catch { new Notice(text('invalidData')); return; }
@@ -49,7 +48,6 @@ export default class PaletteNext extends Plugin {
           if (current) this.apply(editor, current);
         } });
         this.ownedCommandIds.push(id);
-        if (snapshot.preferences.shortcuts) this.shortcuts.push(this.addRibbonIcon(entry.glyph || 'text', entry.title, () => context.insert(entry.key)));
       }
     };
     this.register(this.catalog.subscribe(sync));
@@ -73,9 +71,7 @@ export default class PaletteNext extends Plugin {
   }
   private clearActions(): void {
     for (const command of this.ownedCommandIds) this.removeCommand(command);
-    for (const shortcut of this.shortcuts) shortcut.remove();
     this.ownedCommandIds = [];
-    this.shortcuts = [];
   }
   onunload(): void { this.clearActions(); this.target?.clear(); this.target = null; }
 }

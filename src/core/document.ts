@@ -7,7 +7,6 @@ export interface Clip {
   key: string;
   title: string;
   body: string;
-  glyph: string;
   shade: Shade;
   placement: Placement;
   unique: boolean;
@@ -15,14 +14,14 @@ export interface Clip {
 export interface PaletteDocument {
   format: 1;
   entries: Clip[];
-  preferences: { flow: Flow; icons: boolean; shortcuts: boolean };
+  preferences: { flow: Flow };
 }
 
 export function blankDocument(): PaletteDocument {
-  return { format: 1, entries: [], preferences: { flow: 'tiles', icons: false, shortcuts: false } };
+  return { format: 1, entries: [], preferences: { flow: 'tiles' } };
 }
 export function newClip(key: string): Clip {
-  return { key, title: '', body: '', glyph: 'text', shade: 'auto', placement: 'selection', unique: false };
+  return { key, title: '', body: '', shade: 'auto', placement: 'selection', unique: false };
 }
 function object(value: unknown): Record<string, unknown> {
   if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error('Invalid document');
@@ -33,12 +32,11 @@ export function decodeDocument(value: unknown): PaletteDocument {
   const input = object(value);
   if (input.format !== 1 || !Array.isArray(input.entries)) throw new Error('Unsupported document format');
   const preferences = object(input.preferences);
-  if (!['tiles', 'stack', 'strip'].includes(String(preferences.flow)) ||
-    typeof preferences.icons !== 'boolean' || typeof preferences.shortcuts !== 'boolean') throw new Error('Invalid preferences');
+  if (!['tiles', 'stack', 'strip'].includes(String(preferences.flow))) throw new Error('Invalid preferences');
   const keys = new Set<string>();
   const entries = input.entries.map((value: unknown) => {
     const entry = object(value);
-    for (const field of ['key', 'title', 'body', 'glyph']) {
+    for (const field of ['key', 'title', 'body']) {
       if (typeof entry[field] !== 'string') throw new Error(`Invalid ${field}`);
     }
     if (!entry.key || keys.has(entry.key as string)) throw new Error('Duplicate or empty key');
@@ -47,10 +45,10 @@ export function decodeDocument(value: unknown): PaletteDocument {
       typeof entry.unique !== 'boolean') throw new Error('Invalid entry options');
     return {
       key: entry.key as string, title: entry.title as string, body: entry.body as string,
-      glyph: entry.glyph as string, shade: entry.shade as Shade, placement: entry.placement as Placement, unique: entry.unique
+      shade: entry.shade as Shade, placement: entry.placement as Placement, unique: entry.unique
     };
   });
-  return { format: 1, entries, preferences: { flow: preferences.flow as Flow, icons: preferences.icons, shortcuts: preferences.shortcuts } };
+  return { format: 1, entries, preferences: { flow: preferences.flow as Flow } };
 }
 
 /** Stable colors do not change when the user reorders or filters the palette. */

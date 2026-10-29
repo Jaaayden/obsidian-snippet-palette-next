@@ -29,13 +29,6 @@ export class PalettePreferences extends PluginSettingTab {
         void this.context.catalog.configure({ flow: value as Flow }).catch(() => { this.context.reportSaveFailure(); this.display(); });
       });
     });
-    for (const key of ['icons', 'shortcuts'] as const) {
-      new Setting(this.containerEl).setName(text(key)).addToggle(input => {
-        input.setValue(preferences[key]).onChange(value => {
-          void this.context.catalog.configure({ [key]: value }).catch(() => { this.context.reportSaveFailure(); this.display(); });
-        });
-      });
-    }
     const bar = this.containerEl.createDiv({ cls: 'spn-library-bar' });
     bar.createSpan({ text: text('library') });
     const search = bar.createEl('input', { type: 'search', attr: { 'aria-label': text('search'), placeholder: text('query') } });

@@ -3,7 +3,7 @@ import type { PaletteContext } from '../contracts';
 import { shadeFor } from '../core/document';
 import { text } from '../words';
 import { ClipEditor } from './editor';
-import { glyph, tool } from './elements';
+import { tool } from './elements';
 
 export const WORKSPACE_KIND = 'spn-workspace';
 export class PaletteWorkspace extends ItemView {
@@ -68,7 +68,6 @@ export class PaletteWorkspace extends ItemView {
         cls: `spn-token spn-${shadeFor(entry)}`,
         attr: { type: 'button', 'aria-label': text('insertLabel', { title: entry.title }), title: entry.body }
       });
-      if (document.preferences.icons) glyph(button.createSpan({ cls: 'spn-glyph' }), entry.glyph);
       button.createSpan({ text: entry.title });
       button.addEventListener('mousedown', event => { if (event.button === 0) event.preventDefault(); });
       button.addEventListener('click', () => this.context.insert(entry.key));

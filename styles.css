@@ -25,9 +25,7 @@
 }
 .spn-palette button.spn-token:hover { background: rgba(var(--spn-color), 0.2); }
 .spn-token > span:last-child { min-width: 0; }
-.spn-glyph { display: inline-flex; flex: none; align-items: center; }
-.spn-glyph svg, .spn-tool svg { height: 16px; width: 16px; }
-.spn-glyph-result { display: flex; align-items: center; gap: 10px; }
+.spn-tool svg { height: 16px; width: 16px; }
 .spn-workspace button.spn-tool, .spn-preferences button.spn-tool {
   display: inline-flex; flex: none; align-items: center; justify-content: center;
   width: 27px; height: 27px; min-height: 0; margin: 0; padding: 4px;

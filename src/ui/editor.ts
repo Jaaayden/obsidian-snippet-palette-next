@@ -1,27 +1,7 @@
-import { Modal, Notice, Setting, SuggestModal, getIconIds } from 'obsidian';
+import { Modal, Notice, Setting } from 'obsidian';
 import type { PaletteContext } from '../contracts';
 import { newClip, shades, type Clip, type Placement, type Shade } from '../core/document';
 import { text } from '../words';
-import { glyph } from './elements';
-
-export class GlyphChooser extends SuggestModal<string> {
-  private readonly options = getIconIds();
-  constructor(private context: PaletteContext, private accept: (name: string) => void) {
-    super(context.app);
-    this.setPlaceholder(text('iconQuery'));
-    this.limit = 50;
-  }
-  getSuggestions(query: string): string[] {
-    const words = query.toLowerCase().trim().split(/\s+/);
-    return this.options.filter(option => words.every(word => option.includes(word))).slice(0, this.limit);
-  }
-  renderSuggestion(value: string, item: HTMLElement): void {
-    item.addClass('spn-glyph-result');
-    glyph(item.createSpan({ cls: 'spn-glyph' }), value);
-    item.createSpan({ text: value });
-  }
-  onChooseSuggestion(value: string): void { this.accept(value); }
-}
 
 export class ClipEditor extends Modal {
   private working: Clip;
@@ -37,12 +17,6 @@ export class ClipEditor extends Modal {
       input.setValue(this.working.title).onChange(value => { this.working.title = value; });
       input.inputEl.setAttribute('aria-label', text('title'));
     });
-    const icon = new Setting(this.contentEl).setName(text('icon'));
-    const preview = icon.controlEl.createSpan({ cls: 'spn-glyph' });
-    glyph(preview, this.working.glyph);
-    icon.addButton(button => button.setButtonText(text('choose')).onClick(() => {
-      new GlyphChooser(this.context, value => { this.working.glyph = value; glyph(preview, value); }).open();
-    }));
     new Setting(this.contentEl).setName(text('shade')).addDropdown(input => {
       for (const shade of shades) input.addOption(shade, text(shade));
       input.setValue(this.working.shade).onChange(value => { this.working.shade = value as Shade; });
